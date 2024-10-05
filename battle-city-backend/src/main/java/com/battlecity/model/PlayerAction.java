@@ -5,7 +5,7 @@ public class PlayerAction {
     private String type;
     private String direction;
 
-    // Getters y setters
+    // Getters y Setters
     public String getPlayerId() {
         return playerId;
     }
@@ -28,5 +28,14 @@ public class PlayerAction {
 
     public void setDirection(String direction) {
         this.direction = direction;
+    }
+
+    @Override
+    public String toString() {
+        return "PlayerAction{" +
+                "playerId='" + playerId + '\'' +
+                ", type='" + type + '\'' +
+                ", direction='" + direction + '\'' +
+                '}';
     }
 }

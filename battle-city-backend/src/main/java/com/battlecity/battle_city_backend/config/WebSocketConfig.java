@@ -1,4 +1,4 @@
-package com.battlecity.config;
+package com.battlecity.battle_city_backend.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
@@ -8,7 +8,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 
 @Configuration
 @EnableWebSocketMessageBroker
-public class websocketconfig implements WebSocketMessageBrokerConfigurer {
+public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
@@ -18,6 +18,8 @@ public class websocketconfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/battle-city-websocket").withSockJS();
+        registry.addEndpoint("/battle-city-websocket")
+                .setAllowedOrigins("http://localhost:3000")
+                .withSockJS();
     }
 }

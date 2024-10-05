@@ -18,7 +18,11 @@ public class PlayerController {
     @MessageMapping("/player-action")
     @SendTo("/topic/game-updates")
     public GameState handlePlayerAction(PlayerAction action) {
+        System.out.println("Acción del jugador recibida: " + action);
         gameService.updatePlayerState(action);
-        return gameService.getCurrentGameState();
+        GameState updatedGameState = gameService.getCurrentGameState();
+        System.out.println("Estado del juego actualizado: " + updatedGameState.getPlayers());
+        return updatedGameState;
     }
+
 }
