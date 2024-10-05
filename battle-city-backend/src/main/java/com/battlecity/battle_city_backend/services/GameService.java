@@ -1,6 +1,8 @@
 package com.battlecity.battle_city_backend.services;
 
 import com.battlecity.model.GameState;
+import com.battlecity.model.PlayerAction;
+
 import org.springframework.stereotype.Service;
 
 @Service
@@ -8,20 +10,21 @@ public class GameService {
 
     private GameState gameState = new GameState();
 
-    public void processPlayerAction(String playerId, String action) {
-        // Aquí procesarás las acciones del jugador, por ejemplo mover el tanque o
-        // disparar
-        System.out.println("Procesando acción de " + playerId + ": " + action);
-
-        // Actualizar el estado del juego
-        updateGameState();
+    public void updatePlayerState(PlayerAction action) {
+        // Actualiza la posición del jugador dependiendo de la acción
+        switch (action.getType()) {
+            case "MOVE":
+                // Obtén el jugador por su ID y actualiza la posición según la dirección
+                break;
+            case "SHOOT":
+                // Implementa la lógica para disparar
+                break;
+            default:
+                break;
+        }
     }
 
-    private void updateGameState() {
-        // Lógica para actualizar el estado del juego (movimientos, colisiones, etc.)
-    }
-
-    public GameState getGameState() {
+    public GameState getCurrentGameState() {
         return gameState;
     }
 }
