@@ -12,12 +12,16 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
+        // Prefijo de las rutas donde se envían mensajes a los clientes
         config.enableSimpleBroker("/topic");
+        // Prefijo para los mensajes enviados desde el cliente al backend
         config.setApplicationDestinationPrefixes("/app");
     }
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
+                     //       /game
+        //registry.addEndpoint("/battle-city-websocket").setAllowedOrigins("*").withSockJS(); // Endpoint WebSocket con SockJS
         registry.addEndpoint("/battle-city-websocket")
                 .setAllowedOrigins("http://localhost:3000")
                 .withSockJS();
