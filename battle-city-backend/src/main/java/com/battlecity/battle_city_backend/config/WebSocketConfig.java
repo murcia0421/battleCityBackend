@@ -1,3 +1,4 @@
+// WebSocketConfig.java
 package com.battlecity.battle_city_backend.config;
 
 import org.springframework.context.annotation.Configuration;
