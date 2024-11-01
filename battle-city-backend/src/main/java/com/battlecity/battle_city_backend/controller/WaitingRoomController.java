@@ -1,14 +1,14 @@
 package com.battlecity.battle_city_backend.controller;
 
-import com.battlecity.battle_city_backend.model.Player; // Asegúrate de tener la clase Player
-import com.battlecity.battle_city_backend.services.GameService;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
-import java.util.HashSet;
-import java.util.Set;
+import com.battlecity.model.Player;
 
 @Controller
 public class WaitingRoomController {
