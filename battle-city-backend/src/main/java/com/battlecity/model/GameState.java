@@ -21,5 +21,7 @@ public class GameState {
     public void setPlayers(Map<String, Player> players) { this.players = players; }
 
     public List<Bullet> getBullets() { return bullets; }
-    public void setBullets(List<Bullet> bullets) { this.bullets = bullets; }
+    public void setBullets(List<Bullet> bullets) {
+        this.bullets = null;
+    }
 }

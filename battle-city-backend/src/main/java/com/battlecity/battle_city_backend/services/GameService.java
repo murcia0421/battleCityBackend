@@ -62,6 +62,7 @@ public class GameService {
         gameState.setPlayerId(playerId);
         gameState.setPlayers(new HashMap<>(players));
         gameState.setBullets(new ArrayList<>(bullets));
+        System.out.println("Sending game state with bullets: " + bullets);
         return gameState;
     }
 
