@@ -1,19 +1,36 @@
 package com.battlecity.model;
 
-
 public class PlayerShot {
     private String playerId;
+    private String roomId; // Añadido roomId
     private int x;
     private int y;
     private String direction;
-    // Getters y setters
 
+    // Constructor completo
+    public PlayerShot(String playerId, String roomId, int x, int y, String direction) {
+        this.playerId = playerId;
+        this.roomId = roomId;
+        this.x = x;
+        this.y = y;
+        this.direction = direction;
+    }
+
+    // Getters y Setters
     public String getPlayerId() {
         return playerId;
     }
 
     public void setPlayerId(String playerId) {
         this.playerId = playerId;
+    }
+
+    public String getRoomId() {
+        return roomId;
+    }
+
+    public void setRoomId(String roomId) {
+        this.roomId = roomId;
     }
 
     public int getX() {
