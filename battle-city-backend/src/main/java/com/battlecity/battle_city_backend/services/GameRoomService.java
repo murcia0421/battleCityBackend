@@ -3,11 +3,13 @@ package com.battlecity.battle_city_backend.services;
 import com.battlecity.model.GameRoom;
 import com.battlecity.model.Player;
 import com.battlecity.model.Position;
+import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Service
 public class GameRoomService {
     private Map<String, GameRoom> rooms;
 
@@ -50,6 +52,7 @@ public class GameRoomService {
         GameRoom gameRoom = rooms.get(_roomId);
         return gameRoom != null ? gameRoom.getPlayers() : null ;
     }
+
 
 
 }

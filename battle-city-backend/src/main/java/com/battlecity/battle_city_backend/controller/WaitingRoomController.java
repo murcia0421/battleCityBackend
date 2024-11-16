@@ -1,6 +1,7 @@
 package com.battlecity.battle_city_backend.controller;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.battlecity.battle_city_backend.services.GameRoomService;
@@ -11,8 +12,11 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 import com.battlecity.model.Player;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
+@RequestMapping("/api/waiting-room")
 public class WaitingRoomController {
 
     @Autowired
@@ -37,6 +41,11 @@ public class WaitingRoomController {
             messagingTemplate.convertAndSend("/topic/roomId/", "No se pudo conectar");
         }
 
+    }
+
+    @GetMapping("/rooms")
+    public List<Player> getAllRooms() {
+        return gameRoomService.getPlayersInRoom("room1");
     }
 
 
