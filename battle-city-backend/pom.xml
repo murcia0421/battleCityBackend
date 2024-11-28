@@ -16,6 +16,7 @@
 
     <properties>
         <java.version>17</java.version>
+        <spring-boot.version>2.7.10</spring-boot.version>
     </properties>
 
     <dependencies>
@@ -38,6 +39,11 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>
