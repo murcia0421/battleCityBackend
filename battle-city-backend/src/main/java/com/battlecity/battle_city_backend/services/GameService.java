@@ -1,4 +1,3 @@
-// GameService.java
 package com.battlecity.battle_city_backend.services;
 
 import com.battlecity.model.GameState;
