@@ -1,4 +1,3 @@
-// WebSocketConfig.java
 package com.battlecity.battle_city_backend.config;
 
 import org.springframework.context.annotation.Configuration;
@@ -19,8 +18,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/battle-city-websocket")
-                .setAllowedOrigins("http://localhost:3000")
+        registry.addEndpoint("/ws")
+                .setAllowedOrigins("http://localhost:3000") // Asegúrate que este sea el puerto de tu frontend
                 .withSockJS();
     }
 }
