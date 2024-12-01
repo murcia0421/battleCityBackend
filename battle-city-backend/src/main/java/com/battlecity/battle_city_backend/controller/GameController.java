@@ -3,24 +3,26 @@ package com.battlecity.battle_city_backend.controller;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
-
-import com.battlecity.model.PlayerMove;
-import com.battlecity.model.PlayerShot;
-
 @Controller
 public class GameController {
 
-    @MessageMapping("/move")
-    @SendTo("/topic/moves")
-    public PlayerMove handleMove(PlayerMove move) {
-        // Procesa el movimiento y lo retransmite a todos los clientes
-        return move;
+    @MessageMapping("/game-join")
+    @SendTo("/topic/game-updates")
+    public Object handleGameJoin(String message) {  // Cambiado a String para ver el mensaje raw
+        try {
+            System.out.println("Mensaje raw recibido: " + message);
+            return message; // Devolver el mismo mensaje por ahora
+        } catch (Exception e) {
+            System.err.println("Error procesando mensaje: " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
     }
 
-    @MessageMapping("/shoot")
-    @SendTo("/topic/shots")
-    public PlayerShot handleShot(PlayerShot shot) {
-        // Procesa el disparo y lo retransmite a todos los clientes
-        return shot;
+    @MessageMapping("/game-move")
+    @SendTo("/topic/game-updates")
+    public Object handleGameMove(String moveMessage) {
+        System.out.println("Movimiento recibido: " + moveMessage);
+        return moveMessage;
     }
 }
