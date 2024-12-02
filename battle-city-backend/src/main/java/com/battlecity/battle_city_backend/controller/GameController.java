@@ -60,4 +60,18 @@ public class GameController {
         System.out.println("Movimiento recibido: " + moveMessage);
         return moveMessage;
     }
+
+    @MessageMapping("/bullet-fired")
+    @SendTo("/topic/game-updates")
+    public String handleBulletFired(String bulletMessage) {
+        System.out.println("Disparo recibido: " + bulletMessage);
+        return bulletMessage;
+    }
+
+    @MessageMapping("/bullet-update")
+    @SendTo("/topic/game-updates")
+    public String handleBulletUpdate(String updateMessage) {
+        System.out.println("Actualización de bala: " + updateMessage);
+        return updateMessage;
+    }
 }
