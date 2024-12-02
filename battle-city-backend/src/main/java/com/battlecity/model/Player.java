@@ -10,9 +10,9 @@ public class Player {
         // Constructor vacío necesario para deserialización
     }
 
-    public Player(String id) {
+    public Player(String id, String name) {
         this.id = id;
-        this.name = id;  // Usar id como nombre por defecto
+        this.name = name;  // Usar id como nombre por defecto
         this.position = null;
         this.direction = "down";
     }

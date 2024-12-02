@@ -21,7 +21,7 @@ public class MessageController {
 
         // Crear nuevo jugador
         String playerId = "Jugador " + (players.size() + 1);
-        Player newPlayer = new Player(playerId);
+        Player newPlayer = new Player(playerId, player.getName()    );
 
         // Añadir a la lista si no existe
         if (!players.contains(newPlayer)) {
