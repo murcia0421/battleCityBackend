@@ -1,6 +1,8 @@
 package com.battlecity.battle_city_backend.controller;
 
 import com.battlecity.model.Player;
+
+import org.slf4j.LoggerFactory;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
@@ -8,8 +10,13 @@ import org.springframework.stereotype.Controller;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Controller
 public class MessageController {
+
+    private static final Logger logger = LoggerFactory.getLogger(MessageController.class);
 
     private final List<Player> players = new CopyOnWriteArrayList<>();
     private static final int MAX_PLAYERS = 4;
@@ -17,11 +24,13 @@ public class MessageController {
     @MessageMapping("/players")
     @SendTo("/topic/players")
     public Player handlePlayerMessage(Player player) {
+
         System.out.println("Mensaje recibido en el servidor"); // Log para debug
+        System.out.println("Recibido el color del tanque de " + player.getName() + ": " + player.getTankColor());
 
         // Crear nuevo jugador
         String playerId = "Jugador " + (players.size() + 1);
-        Player newPlayer = new Player(playerId, player.getName()    );
+        Player newPlayer = new Player(playerId, player.getName(), player.getTankColor());
 
         // Añadir a la lista si no existe
         if (!players.contains(newPlayer)) {
@@ -32,7 +41,6 @@ public class MessageController {
 
         return newPlayer;
     }
-
 
     @MessageMapping("/leave")
     @SendTo("/topic/players")
