@@ -9,7 +9,6 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
 import com.battlecity.model.GameState;
 import com.battlecity.battle_city_backend.services.GameService;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -19,8 +18,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class GameController {
 
     private static final Logger logger = LoggerFactory.getLogger(GameController.class);
-
     private static final int INITIAL_LIVES = 3;
+    private static final String PLAYER_ID = "playerId";  // Constant for playerId to avoid duplication
     private final List<String> playerOrder = new ArrayList<>();
     private final Map<String, Integer> playerLives = new ConcurrentHashMap<>();
     private final GameService gameService;
@@ -42,7 +41,7 @@ public class GameController {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode gameStartData = mapper.readTree(message);
             JsonNode playerInfo = gameStartData.get("player");
-            String playerId = playerInfo.get("id").asText();
+            String playerId = playerInfo.get(PLAYER_ID).asText();
             if (!playerOrder.contains(playerId)) {
                 playerOrder.add(playerId);
             }
@@ -52,7 +51,7 @@ public class GameController {
                     "playerIndex", playerOrder.indexOf(playerId)
             ));
         } catch (Exception e) {
-            logger.error("Error procesando inicio de juego: {}", e.getMessage(), e);
+            logger.error("Error processing game start: {}", e.getMessage(), e);
             return message;
         }
     }
@@ -61,7 +60,8 @@ public class GameController {
     @MessageMapping("/game-join")
     @SendTo("/topic/game-updates")
     public Object handleGameJoin(String joinMessage) {
-        logger.info("Jugador uniéndose: {}", joinMessage);
+        // Avoid logging sensitive user-controlled data
+        logger.info("Player joining game");
         return joinMessage;
     }
 
@@ -69,21 +69,24 @@ public class GameController {
     @MessageMapping("/game-move")
     @SendTo("/topic/game-updates")
     public Object handleGameMove(String moveMessage) {
-        logger.info("Movimiento recibido: {}", moveMessage);
+        // Avoid logging sensitive user-controlled data
+        logger.info("Movement received");
         return moveMessage;
     }
 
     @MessageMapping("/bullet-fired")
     @SendTo("/topic/game-updates")
     public String handleBulletFired(String bulletMessage) {
-        logger.info("Disparo recibido: {}", bulletMessage);
+        // Avoid logging sensitive user-controlled data
+        logger.info("Bullet fired");
         return bulletMessage;
     }
 
     @MessageMapping("/bullet-update")
     @SendTo("/topic/game-updates")
     public String handleBulletUpdate(String updateMessage) {
-        logger.info("Actualización de bala: {}", updateMessage);
+        // Avoid logging sensitive user-controlled data
+        logger.info("Bullet update received");
         return updateMessage;
     }
 
@@ -93,25 +96,24 @@ public class GameController {
         try {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode hit = mapper.readTree(hitMessage);
-            String playerId = hit.get("playerId").asText();
-            // Reducir vidas del jugador impactado
+            String playerId = hit.get(PLAYER_ID).asText();
             int lives = playerLives.getOrDefault(playerId, INITIAL_LIVES) - 1;
             playerLives.put(playerId, lives);
-            // Si el jugador perdió todas sus vidas
+
             if (lives <= 0) {
                 return mapper.writeValueAsString(Map.of(
                         "type", "PLAYER_ELIMINATED",
-                        "playerId", playerId
+                        PLAYER_ID, playerId
                 ));
             }
-            // Si aún tiene vidas
+
             return mapper.writeValueAsString(Map.of(
                     "type", "PLAYER_HIT",
-                    "playerId", playerId,
+                    PLAYER_ID, playerId,
                     "lives", lives
             ));
         } catch (Exception e) {
-            logger.error("Error procesando hit: {}", e.getMessage(), e);
+            logger.error("Error processing player hit: {}", e.getMessage(), e);
             return hitMessage;
         }
     }
@@ -122,20 +124,21 @@ public class GameController {
         try {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode respawn = mapper.readTree(respawnMessage);
-            String playerId = respawn.get("playerId").asText();
+            String playerId = respawn.get(PLAYER_ID).asText();
             playerLives.put(playerId, INITIAL_LIVES);
             int playerIndex = playerOrder.indexOf(playerId);
             Map<String, Object> respawnPosition = playerIndex == 0 ?
                     Map.of("x", 1, "y", 1) :
                     Map.of("x", 2, "y", 9);
+
             return mapper.writeValueAsString(Map.of(
                     "type", "PLAYER_RESPAWN",
-                    "playerId", playerId,
+                    PLAYER_ID, playerId,
                     "lives", INITIAL_LIVES,
                     "position", respawnPosition
             ));
         } catch (Exception e) {
-            logger.error("Error procesando respawn: {}", e.getMessage(), e);
+            logger.error("Error processing player respawn: {}", e.getMessage(), e);
             return respawnMessage;
         }
     }
