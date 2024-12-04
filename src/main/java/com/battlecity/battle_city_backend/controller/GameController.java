@@ -5,11 +5,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
-
+import com.battlecity.model.GameState;
+import com.battlecity.battle_city_backend.services.GameService;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.stereotype.Controller;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
 
 @Controller
 public class GameController {
@@ -20,6 +25,17 @@ public class GameController {
     private final List<String> playerOrder = new ArrayList<>();
     //Jugadores
     private final Map<String, Integer> playerLives = new ConcurrentHashMap<>();
+
+    private final GameService gameService;
+    public GameController(GameService gameService) {
+        this.gameService = gameService;
+    }
+
+    @MessageMapping("/update-walls")
+    @SendTo("/topic/game-updates")
+    public GameState handleWallUpdate() {
+        return gameService.getCurrentGameState();
+    }
 
 
     @MessageMapping("/game-start")
