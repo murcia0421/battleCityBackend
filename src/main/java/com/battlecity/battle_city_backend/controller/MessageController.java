@@ -1,44 +1,35 @@
 package com.battlecity.battle_city_backend.controller;
 
 import com.battlecity.model.Player;
-
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
-
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Controller
 public class MessageController {
 
     private static final Logger logger = LoggerFactory.getLogger(MessageController.class);
-
     private final List<Player> players = new CopyOnWriteArrayList<>();
     private static final int MAX_PLAYERS = 4;
 
     @MessageMapping("/players")
     @SendTo("/topic/players")
     public Player handlePlayerMessage(Player player) {
-
-        System.out.println("Mensaje recibido en el servidor"); // Log para debug
-        System.out.println("Recibido el color del tanque de " + player.getName() + ": " + player.getTankColor());
-
+        logger.info("Mensaje recibido en el servidor");
+        logger.info("Recibido el color del tanque de {}: {}", player.getName(), player.getTankColor());
         // Crear nuevo jugador
         String playerId = "Jugador " + (players.size() + 1);
         Player newPlayer = new Player(playerId, player.getName(), player.getTankColor());
-
         // Añadir a la lista si no existe
         if (!players.contains(newPlayer)) {
             players.add(newPlayer);
-            System.out.println("Nuevo jugador añadido: " + playerId); // Log para debug
-            System.out.println("Total jugadores: " + players.size()); // Log para debug
+            logger.info("Nuevo jugador añadido: {}", playerId);
+            logger.info("Total jugadores: {}", players.size());
         }
-
         return newPlayer;
     }
 
@@ -46,8 +37,8 @@ public class MessageController {
     @SendTo("/topic/players")
     public void handlePlayerLeave(String playerId) {
         players.removeIf(p -> p.getId().equals(playerId));
-        System.out.println("Jugador eliminado: " + playerId);
-        System.out.println("Total de jugadores: " + players.size());
+        logger.info("Jugador eliminado: {}", playerId);
+        logger.info("Total de jugadores: {}", players.size());
     }
 
     public List<Player> getPlayers() {
@@ -61,7 +52,7 @@ public class MessageController {
     @MessageMapping("/request-players")
     @SendTo("/topic/players")
     public List<Player> getPlayersStatus() {
-        System.out.println("Solicitada lista de jugadores actual. Total: " + players.size());
+        logger.info("Solicitada lista de jugadores actual. Total: {}", players.size());
         return players;
     }
 }
