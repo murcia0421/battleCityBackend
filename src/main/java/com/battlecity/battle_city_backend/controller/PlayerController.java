@@ -29,11 +29,6 @@ public class PlayerController {
         return players;
     }
 
-    /*@PostMapping("/players")
-    public void save(@RequestBody Player player){
-        playerService.save(player);
-    }*/
-
     @PostMapping("/players")
     public void save(@RequestBody PlayerDTO playerDTO) {
         // Convierte el DTO a la entidad
@@ -46,11 +41,6 @@ public class PlayerController {
 
         playerService.save(player);
     }
-
-    /*@GetMapping("/players")
-    public List<Player> findAll(){
-        return playerService.findAll();
-    }*/
 
     @GetMapping("/players")
     public List<PlayerDTO> findAll() {
@@ -67,11 +57,6 @@ public class PlayerController {
             return playerDTO;
         }).toList();
     }
-
-    /*@GetMapping("/player/{id}")
-    public Player findById(@PathVariable String id){
-        return playerService.findById(id).get();
-    }*/
 
     @GetMapping("/player/{id}")
     public PlayerDTO findById(@PathVariable String id) {
@@ -93,10 +78,6 @@ public class PlayerController {
         playerService.deleteById(id);
     }
 
-    /*@PutMapping("/players")
-    public void update(@RequestBody Player player){
-        playerService.save(player);
-    }*/
 
     @PutMapping("/players")
     public void update(@RequestBody PlayerDTO playerDTO) {
