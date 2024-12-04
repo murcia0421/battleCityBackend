@@ -20,16 +20,19 @@ public class MessageController {
     @SendTo("/topic/players")
     public Player handlePlayerMessage(Player player) {
         logger.info("Mensaje recibido en el servidor");
-        logger.info("Recibido el color del tanque de {}: {}", player.getName(), player.getTankColor());
-        // Crear nuevo jugador
+
+        // Only log non-sensitive or system-controlled information
+        logger.info("Recibido color del tanque. Nombre del jugador no registrado para evitar filtración.");
+
         String playerId = "Jugador " + (players.size() + 1);
         Player newPlayer = new Player(playerId, player.getName(), player.getTankColor());
-        // Añadir a la lista si no existe
+
         if (!players.contains(newPlayer)) {
             players.add(newPlayer);
-            logger.info("Nuevo jugador añadido: {}", playerId);
-            logger.info("Total jugadores: {}", players.size());
+            logger.info("Nuevo jugador añadido con ID interno: {}", playerId);
+            logger.info("Total jugadores en la lista: {}", players.size());
         }
+
         return newPlayer;
     }
 
@@ -37,8 +40,10 @@ public class MessageController {
     @SendTo("/topic/players")
     public void handlePlayerLeave(String playerId) {
         players.removeIf(p -> p.getId().equals(playerId));
-        logger.info("Jugador eliminado: {}", playerId);
-        logger.info("Total de jugadores: {}", players.size());
+
+        // Log internal identifiers only, avoid logging actual player ID from user input
+        logger.info("Jugador con ID interno eliminado.");
+        logger.info("Total de jugadores restantes: {}", players.size());
     }
 
     public List<Player> getPlayers() {
@@ -52,7 +57,7 @@ public class MessageController {
     @MessageMapping("/request-players")
     @SendTo("/topic/players")
     public List<Player> getPlayersStatus() {
-        logger.info("Solicitada lista de jugadores actual. Total: {}", players.size());
+        logger.info("Solicitud de estado de jugadores recibida. Total de jugadores en la lista: {}", players.size());
         return players;
     }
 }

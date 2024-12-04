@@ -4,6 +4,8 @@ import com.battlecity.model.GameState;
 import com.battlecity.model.Player;
 import com.battlecity.model.PlayerAction;
 import com.battlecity.model.Bullet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -14,6 +16,9 @@ import java.util.ArrayList;
 
 @Service
 public class GameService {
+
+    private static final Logger logger = LoggerFactory.getLogger(GameService.class);
+
     private final Map<String, Player> players = new ConcurrentHashMap<>();
     private final List<Bullet> bullets = new ArrayList<>();
 
@@ -61,7 +66,9 @@ public class GameService {
         gameState.setPlayerId(playerId);
         gameState.setPlayers(new HashMap<>(players));
         gameState.setBullets(new ArrayList<>(bullets));
-        System.out.println("Sending game state with bullets: " + bullets);
+
+        logger.info("Sending game state with bullets: {}", bullets);
+
         return gameState;
     }
 
