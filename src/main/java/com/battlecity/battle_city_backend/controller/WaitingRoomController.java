@@ -1,7 +1,6 @@
 package com.battlecity.battle_city_backend.controller;
 
 import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -16,40 +15,32 @@ import com.battlecity.model.Player;
 @Controller
 @RequestMapping("/api/waiting-room")
 public class WaitingRoomController {
+
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
+
     private final GameRoomService gameRoomService;
-    public WaitingRoomController(GameRoomService gameRoomService, SimpMessagingTemplate _messagingTemplate) {
+
+    public WaitingRoomController(GameRoomService gameRoomService, SimpMessagingTemplate messagingTemplate) {
         this.gameRoomService = gameRoomService;
-        this.messagingTemplate = _messagingTemplate;
+        this.messagingTemplate = messagingTemplate;
     }
 
     @MessageMapping("/joinRoom")
-    public void joinRoom(String _roomId, Player _player)
-    {
-        GameRoom gameRoom;
-        boolean success = gameRoomService.addPlayerToRoom(_roomId, _player);
-        if(success){
-            gameRoom = gameRoomService.getRoom(_roomId);
-            messagingTemplate.convertAndSend("/topic/roomId/",gameRoom);
-        }
-        else {
-            messagingTemplate.convertAndSend("/topic/roomId/", "No se pudo conectar");
-        }
+    public void joinRoom(String roomId, Player player) {
+        boolean success = gameRoomService.addPlayerToRoom(roomId, player);
 
+        if (success) {
+            GameRoom gameRoom = gameRoomService.getRoom(roomId);
+            messagingTemplate.convertAndSend("/topic/room/" + roomId, gameRoom); // Dynamic topic
+        } else {
+            messagingTemplate.convertAndSend("/topic/room/" + roomId, "Unable to connect to the room"); // More informative message
+        }
     }
 
     @GetMapping("/rooms")
-    public List<Player> getAllRooms() {
+    public List<Player> getPlayersInRoom() {
+        // Assuming room "room1" is a placeholder, this could be made dynamic in real-world scenarios
         return gameRoomService.getPlayersInRoom("room1");
     }
-
-
-
-    //private Set<String> players = new HashSet<>();
-    /*@MessageMapping("/join")
-    public void joinRoom(Player player) {
-        players.add(player.getName());
-        messagingTemplate.convertAndSend("/topic/players", players);
-    }*/
 }
