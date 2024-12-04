@@ -6,30 +6,33 @@ public class GameRoom {
 
     private String roomId;
     private List<Player> players;
+    private int maxPlayers;
 
-    private int maxPlayer;
-
-    public GameRoom(String roomId, int maxPlayer) {
-        this.maxPlayer = maxPlayer;
+    // Constructor to initialize the game room with an ID and maximum number of players
+    public GameRoom(String roomId, int maxPlayers) {
         this.roomId = roomId;
+        this.maxPlayers = maxPlayers;
         this.players = new ArrayList<>();
     }
 
-    public boolean canPlayer(){
-        return players.size() < this.maxPlayer;
+    // Checks if there is space for another player in the room
+    public boolean canPlayerJoin() {
+        return players.size() < this.maxPlayers;
     }
 
-    public void addPlayer(Player _player)
-    {
-        if(this.canPlayer()){
-            players.add(_player);
+    // Adds a player to the game room
+    public void addPlayer(Player player) {
+        if (this.canPlayerJoin()) {
+            players.add(player);
         }
     }
 
-    public void deletePlayer(String _playerId){
-        players.removeIf(player -> player.getId().equals(_playerId));
+    // Removes a player by their ID from the game room
+    public void removePlayer(String playerId) {
+        players.removeIf(player -> player.getId().equals(playerId));
     }
 
+    // Getters and setters
     public String getRoomId() {
         return roomId;
     }
@@ -45,5 +48,4 @@ public class GameRoom {
     public void setPlayers(List<Player> players) {
         this.players = players;
     }
-
 }

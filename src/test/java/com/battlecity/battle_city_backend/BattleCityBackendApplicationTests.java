@@ -16,7 +16,7 @@ public class BattleCityBackendApplicationTests {
 		room.addPlayer(player1);
 		room.addPlayer(player2);
 
-		assertFalse(room.canPlayer(), "Room should be full");
+		assertFalse(room.canPlayerJoin(), "Room should be full");
 	}
 
 	@Test
@@ -36,7 +36,7 @@ public class BattleCityBackendApplicationTests {
 		Player player = new Player("1", "Player 1", "red");
 
 		room.addPlayer(player);
-		room.deletePlayer("1");
+		room.removePlayer("1");  // Use the renamed method
 
 		assertEquals(0, room.getPlayers().size());
 	}
@@ -205,5 +205,4 @@ public class BattleCityBackendApplicationTests {
 		assertEquals(position1.getX(), position2.getX());
 		assertEquals(position1.getY(), position2.getY());
 	}
-
 }
