@@ -8,19 +8,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@RestController
-@RequestMapping("/api/v1")
-@RequiredArgsConstructor
+@Controller
 public class PlayerController {
 
     private final List<String> players = new ArrayList<>();
-    private final PlayerService playerService;
-    private final PowerService powerService;
 
     @MessageMapping("/add-player")
     @SendTo("/topic/players")
