@@ -26,6 +26,8 @@ public class GameController {
 
     public GameController(GameService gameService) {
         this.gameService = gameService;
+        System.out.println(playerLives);
+
     }
 
     @MessageMapping("/update-walls")
@@ -90,56 +92,64 @@ public class GameController {
         return updateMessage;
     }
 
+
+
     @MessageMapping("/player-hit")
     @SendTo("/topic/game-updates")
     public String handlePlayerHit(String hitMessage) {
         try {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode hit = mapper.readTree(hitMessage);
-            String playerId = hit.get(PLAYER_ID).asText();
-            int lives = playerLives.getOrDefault(playerId, INITIAL_LIVES) - 1;
-            playerLives.put(playerId, lives);
+            String playerId = hit.get("playerId").asText();
 
-            if (lives <= 0) {
+            // Reducir vidas
+            int currentLives = playerLives.getOrDefault(playerId, INITIAL_LIVES);
+            int newLives = Math.max(0, currentLives - 1);
+            playerLives.put(playerId, newLives);
+
+            // Si el jugador se quedó sin vidas
+            if (newLives <= 0) {
+                // Contar jugadores vivos
+                long playersAlive = playerLives.values().stream()
+                        .filter(lives -> lives > 0)
+                        .count();
+                System.out.println(playerLives);
+                System.out.println(playersAlive);
+                System.out.println(playerLives.getOrDefault(playerId, INITIAL_LIVES));
+
+                // Si solo queda un jugador vivo
+                if (playersAlive == 1) {
+                    // Encontrar al ganador
+                    String winner = playerLives.entrySet().stream()
+                            .filter(entry -> entry.getValue() > 0)
+                            .map(Map.Entry::getKey)
+                            .findFirst()
+                            .orElse(null);
+
+                    return mapper.writeValueAsString(Map.of(
+                            "type", "GAME_OVER",
+                            "winner", winner
+                    ));
+                }
+
                 return mapper.writeValueAsString(Map.of(
                         "type", "PLAYER_ELIMINATED",
-                        PLAYER_ID, playerId
+                        "playerId", playerId
                 ));
             }
 
+            // Si aún tiene vidas
             return mapper.writeValueAsString(Map.of(
                     "type", "PLAYER_HIT",
-                    PLAYER_ID, playerId,
-                    "lives", lives
+                    "playerId", playerId,
+                    "lives", newLives
             ));
         } catch (Exception e) {
-            logger.error("Error processing player hit: {}", e.getMessage(), e);
+            System.err.println("Error procesando hit: " + e.getMessage());
             return hitMessage;
         }
+
     }
 
-    @MessageMapping("/player-respawn")
-    @SendTo("/topic/game-updates")
-    public String handlePlayerRespawn(String respawnMessage) {
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode respawn = mapper.readTree(respawnMessage);
-            String playerId = respawn.get(PLAYER_ID).asText();
-            playerLives.put(playerId, INITIAL_LIVES);
-            int playerIndex = playerOrder.indexOf(playerId);
-            Map<String, Object> respawnPosition = playerIndex == 0 ?
-                    Map.of("x", 1, "y", 1) :
-                    Map.of("x", 2, "y", 9);
 
-            return mapper.writeValueAsString(Map.of(
-                    "type", "PLAYER_RESPAWN",
-                    PLAYER_ID, playerId,
-                    "lives", INITIAL_LIVES,
-                    "position", respawnPosition
-            ));
-        } catch (Exception e) {
-            logger.error("Error processing player respawn: {}", e.getMessage(), e);
-            return respawnMessage;
-        }
-    }
 }
