@@ -1,6 +1,14 @@
 package com.battlecity.model;
 
+
+import lombok.Data;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+@Document(value = "Players")
+@Data
 public class Player {
+    @Id
     private String id;
     private String name; // Añadido campo name
     private Position position;
