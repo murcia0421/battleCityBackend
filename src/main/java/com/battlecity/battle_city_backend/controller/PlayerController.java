@@ -22,12 +22,6 @@ public class PlayerController {
     private final PlayerService playerService;
     private final PowerService powerService;
 
-
-    public PlayerController(PlayerService playerService, PowerService powerService) {
-        this.playerService = playerService;
-        this.powerService = powerService;
-    }
-
     @MessageMapping("/add-player")
     @SendTo("/topic/players")
     public List<String> addPlayer(String playerName) {
