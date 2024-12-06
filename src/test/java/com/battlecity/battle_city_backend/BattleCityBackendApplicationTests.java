@@ -3,7 +3,7 @@ package com.battlecity.battle_city_backend;
 import com.battlecity.model.*;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import java.util.*;
 
 class BattleCityBackendApplicationTests {
 
@@ -250,6 +250,33 @@ class BattleCityBackendApplicationTests {
 
 		assertEquals("gameStart", gameState.getType());
 		assertEquals("player1", gameState.getPlayerId());
+	}
+
+	@Test
+	void testGameStateWithEmptyValues() {
+		GameState gameState = new GameState();
+
+		gameState.setPlayers(new HashMap<>());
+		gameState.setBullets(new ArrayList<>());
+		gameState.setWalls(new ArrayList<>());
+
+		assertTrue(gameState.getPlayers().isEmpty(), "Players map should be empty");
+		assertTrue(gameState.getBullets().isEmpty(), "Bullets list should be empty");
+		assertTrue(gameState.getWalls().isEmpty(), "Walls list should be empty");
+	}
+
+	@Test
+	void testGameStateWithMultiplePlayers() {
+		GameState gameState = new GameState();
+
+		Map<String, Player> players = new HashMap<>();
+		players.put("player1", new Player("1", "Player One", "green"));
+		players.put("player2", new Player("2", "Player Two", "blue"));
+		gameState.setPlayers(players);
+
+		assertEquals(2, gameState.getPlayers().size(), "Players map should have 2 players");
+		assertTrue(gameState.getPlayers().containsKey("player1"), "Players map should contain player1");
+		assertTrue(gameState.getPlayers().containsKey("player2"), "Players map should contain player2");
 	}
 
 	// Test Bullet
@@ -532,7 +559,4 @@ class BattleCityBackendApplicationTests {
 		assertNotEquals(playerDTO1.getDirection(), playerDTO2.getDirection());
 		assertNotEquals(playerDTO1.getTankColor(), playerDTO2.getTankColor());
 	}
-
-	// Test Cors
-
 }
