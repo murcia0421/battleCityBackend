@@ -32,8 +32,7 @@ public class GameController {
     public GameController(SimpMessagingTemplate messagingTemplate, GameService gameService) {
         this.messagingTemplate = messagingTemplate;
         this.gameService = gameService;
-        System.out.println(playerLives);
-
+        logger.info("Initialized GameController with empty playerLives map: {}", playerLives);
     }
 
     @MessageMapping("/update-walls")
@@ -53,6 +52,7 @@ public class GameController {
             if (!playerOrder.contains(playerId)) {
                 playerOrder.add(playerId);
             }
+            logger.info("Game started for player: {} with index: {}", playerId, playerOrder.indexOf(playerId));
             return mapper.writeValueAsString(Map.of(
                     "type", "GAME_START",
                     "player", playerInfo,
@@ -64,7 +64,6 @@ public class GameController {
         }
     }
 
-    // Endpoint para unirse
     @MessageMapping("/game-join")
     @SendTo("/topic/game-updates")
     public Object handleGameJoin(String joinMessage) {
@@ -75,27 +74,19 @@ public class GameController {
 
             Player player = mapper.treeToValue(playerNode, Player.class);
             String playerId = player.getId();
-            System.out.println("player :" + player.getId() + "nombre :" + player.getName() +
-                    "numero de vidas: " + player.isAlive() + player.getLives() + "posicion: " +player.getPosition());
+
             players.put(playerId, player);
 
-            logger.info("Player joining game with ID: " + playerId);
-
-
-            return joinMessage; // Mantenemos el mismo formato de respuesta
+            logger.info("Player joined - ID: {}, Name: {}, Lives: {}, Position: {}",
+                    player.getId(), player.getName(), player.getLives(), player.getPosition());
+            return joinMessage;
 
         } catch (Exception e) {
-            logger.error("Error processing join message: " + e.getMessage());
-            return joinMessage; // En caso de error, devolvemos el mensaje original
+            logger.error("Error processing join message: {}", e.getMessage(), e);
+            return joinMessage;
         }
     }
 
-    // Método para obtener un jugador (por si lo necesitas)
-    public Player getPlayer(String playerId) {
-        return players.get(playerId);
-    }
-
-    // Endpoint para movimiento
     @MessageMapping("/game-move")
     @SendTo("/topic/game-updates")
     public Object handleGameMove(String moveMessage) {
@@ -107,48 +98,40 @@ public class GameController {
             Player player = players.get(playerId);
 
             if (player != null) {
-                // Actualizar los datos del jugador
                 player.setPosition(mapper.treeToValue(moveData.get("position"), Position.class));
                 player.setDirection(moveData.get("direction").asText());
                 player.setLives(moveData.get("lives").asInt());
                 player.setAlive(moveData.get("isAlive").asBoolean());
                 player.setName(moveData.get("name").asText());
 
-                // Guardar el jugador actualizado
                 players.put(playerId, player);
 
-                logger.info("Player " + playerId + " position updated");
+                logger.info("Player move - ID: {}, Name: {}, Lives: {}, Position: ({}, {})",
+                        player.getId(), player.getName(), player.getLives(),
+                        player.getPosition().getX(), player.getPosition().getY());
             }
-            System.out.println("player :" + player.getId() +" "+ "nombre :" + player.getName() +" "+
-                    "numero de vidas: " + player.isAlive() +" " + player.getLives()
-                    + "posicionX: " + player.getPosition().getX() +" "+ "posicionY: " + player.getPosition().getY());
-            players.put(playerId, player);
 
-            return moveMessage; // Mantenemos el formato de respuesta original
+            return moveMessage;
 
         } catch (Exception e) {
-            logger.error("Error processing move message: " + e.getMessage());
+            logger.error("Error processing move message: {}", e.getMessage(), e);
             return moveMessage;
         }
     }
 
-        @MessageMapping("/bullet-fired")
-        @SendTo("/topic/game-updates")
-        public String handleBulletFired(String bulletMessage) {
-            // Avoid logging sensitive user-controlled data
-            logger.info("Bullet fired");
-            return bulletMessage;
-        }
+    @MessageMapping("/bullet-fired")
+    @SendTo("/topic/game-updates")
+    public String handleBulletFired(String bulletMessage) {
+        logger.info("Bullet fired event received");
+        return bulletMessage;
+    }
 
-        @MessageMapping("/bullet-update")
-        @SendTo("/topic/game-updates")
-        public String handleBulletUpdate(String updateMessage) {
-            // Avoid logging sensitive user-controlled data
-            logger.info("Bullet update received");
-            return updateMessage;
-        }
-
-
+    @MessageMapping("/bullet-update")
+    @SendTo("/topic/game-updates")
+    public String handleBulletUpdate(String updateMessage) {
+        logger.info("Bullet update event received");
+        return updateMessage;
+    }
 
     @MessageMapping("/player-hit")
     public void handlePlayerHit(String hitMessage) {
@@ -157,13 +140,10 @@ public class GameController {
             JsonNode hit = mapper.readTree(hitMessage);
             String playerId = hit.get("playerId").asText();
 
-            // Obtener el jugador del HashMap
             Player player = players.get(playerId);
-            System.out.println("Pre-hit - Player:" + player.getId() +
-                    " Lives:" + player.getLives() +
-                    " IsAlive:" + player.isAlive());
+            logger.info("Pre-hit - Player: {}, Lives: {}, IsAlive: {}",
+                    player.getId(), player.getLives(), player.isAlive());
 
-            // Reducir vidas
             int newLives = Math.max(0, player.getLives() - 1);
             player.setLives(newLives);
 
@@ -171,15 +151,12 @@ public class GameController {
                 player.setAlive(false);
                 players.put(playerId, player);
 
-                // Enviamos primero el mensaje de eliminación
                 messagingTemplate.convertAndSend("/topic/game-updates",
                         Map.of(
                                 "type", "PLAYER_ELIMINATED",
                                 "playerId", playerId
-                        )
-                );
+                        ));
 
-                // Verificamos si hay un ganador
                 long playersAlive = players.values().stream()
                         .filter(Player::isAlive)
                         .count();
@@ -191,27 +168,22 @@ public class GameController {
                             .findFirst()
                             .orElse(null);
 
-                    // Enviamos el mensaje de victoria
                     messagingTemplate.convertAndSend("/topic/game-updates",
                             Map.of(
                                     "type", "GAME_OVER",
                                     "winner", winner
-                            )
-                    );
+                            ));
                 }
             } else {
-                // Si aún tiene vidas
                 messagingTemplate.convertAndSend("/topic/game-updates",
                         Map.of(
                                 "type", "PLAYER_HIT",
                                 "playerId", playerId,
                                 "lives", newLives
-                        )
-                );
+                        ));
             }
-
         } catch (Exception e) {
-            logger.error("Error procesando hit: " + e.getMessage());
+            logger.error("Error processing hit: {}", e.getMessage(), e);
         }
     }
 }
