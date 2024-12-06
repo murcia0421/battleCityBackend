@@ -1,12 +1,45 @@
 package com.battlecity.battle_city_backend;
 
 import com.battlecity.model.*;
+import com.battlecity.battle_city_backend.repository.PlayerRepository;
+import com.battlecity.battle_city_backend.services.PlayerService;
+import com.battlecity.battle_city_backend.services.GameService;
+import com.battlecity.battle_city_backend.controller.GameController;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+
+import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 import java.util.*;
 
+@SpringBootTest
 class BattleCityBackendApplicationTests {
 
+	@Mock
+	private PlayerRepository playerRepository;
+
+	@InjectMocks
+	private PlayerService playerService;
+
+	@Mock
+	private SimpMessagingTemplate messagingTemplate;
+
+	@Mock
+	private GameService gameService;
+
+	@InjectMocks
+	private GameController gameController;
+
+	@BeforeEach
+	public void setup() {
+		// Inicializa los mocks antes de cada prueba
+		MockitoAnnotations.openMocks(this);
+	}
 	// Test GameRoom
 	@Test
 	void testCanAddPlayer() {
@@ -558,5 +591,28 @@ class BattleCityBackendApplicationTests {
 		assertNotEquals(playerDTO1.getPosition().getY(), playerDTO2.getPosition().getY());
 		assertNotEquals(playerDTO1.getDirection(), playerDTO2.getDirection());
 		assertNotEquals(playerDTO1.getTankColor(), playerDTO2.getTankColor());
+	}
+
+	//Test GameController
+	@Test
+	public void testHandleWallUpdate() {
+		GameService gameService = mock(GameService.class);
+		GameState gameState = new GameState();
+		when(gameService.getCurrentGameState()).thenReturn(gameState);
+		GameController gameController = new GameController(mock(SimpMessagingTemplate.class), gameService);
+		GameState result = gameController.handleWallUpdate();
+
+		assertNotNull(result);
+		verify(gameService, times(1)).getCurrentGameState();
+	}
+
+	@Test
+	public void testHandleGameStart() {
+		String message = "{\"player\":{\"playerId\":\"1\",\"name\":\"Player1\"}}";
+		Object result = gameController.handleGameStart(message);
+		assertTrue(result instanceof String);
+		String resultString = (String) result;
+		assertNotNull(resultString);
+		assertTrue(resultString.contains("GAME_START"));
 	}
 }
