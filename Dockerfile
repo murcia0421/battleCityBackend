@@ -1,14 +1,20 @@
-# Usar una imagen base de Java
-FROM openjdk:17-jdk-alpine
-
-# Establecer el directorio de trabajo dentro del contenedor
+FROM maven:3-openjdk-17 AS build
 WORKDIR /app
 
-# Copiar el archivo .jar generado en el contenedor
-COPY target/*.jar /app/backend.jar
+COPY pom.xml ./
+RUN mvn dependency:go-offline -B
 
-# Exponer el puerto en el que corre la aplicación (por defecto 8080)
-EXPOSE 8080
+COPY src ./src
+RUN mvn clean package -DskipTests
 
-# Comando para ejecutar la aplicación Spring Boot
-ENTRYPOINT ["java", "-jar", "backend.jar"]
+FROM openjdk:17-jdk-slim
+VOLUME /tmp
+
+LABEL maintainer="tu-email@example.com"
+LABEL version="1.0.0"
+LABEL description="Aplicación Java construida con Maven"
+
+COPY --from=build /app/target/*.jar app.jar
+
+ENV JAVA_OPTS=""
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar /app.jar"]
