@@ -1,6 +1,7 @@
 package com.battlecity.model;
 
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -14,17 +15,30 @@ public class Player {
     private Position position;
     private String direction;
     private String tankColor;
+    private int lives;
+    private boolean Alive;
 
     public Player() {
         // Constructor vacío necesario para deserialización
     }
 
-    public Player(String id, String name, String tankColor) {
+    public Player(String id, String name, String tankColor, int lives, boolean isAlive) {
         this.id = id;
         this.name = name;
         this.tankColor = tankColor;
         this.position = null; // Posición inicial
         this.direction = "down"; // Dirección inicial
+        this.lives = lives;
+        this.Alive = isAlive;
+    }
+
+    public Player(String playerId, String name, String tankColor) {
+        this.id = playerId;
+        this.name = name;
+        this.tankColor = tankColor;
+        this.position = null; // Posición inicial
+        this.direction = "down"; // Dirección inicial
+        this.Alive = true;
     }
 
     // Getters and Setters originales
@@ -67,5 +81,22 @@ public class Player {
 
     public void setTankColor(String tankColor) {
         this.tankColor = tankColor;
+    }
+
+    public int getLives() {
+        return lives;
+    }
+
+    public void setLives(int lives) {
+        this.lives = lives;
+    }
+    @JsonProperty("isAlive") // Este mapeo conecta el JSON con "isAlive" al atributo "alive".
+    public boolean isAlive() {
+        return Alive;
+    }
+
+    @JsonProperty("isAlive")
+    public void setAlive(boolean alive) {
+        this.Alive = alive;
     }
 }
