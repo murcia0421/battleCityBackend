@@ -22,7 +22,6 @@ public class GameController {
     private final SimpMessagingTemplate messagingTemplate;
 
     private static final Logger logger = LoggerFactory.getLogger(GameController.class);
-    // private static final int INITIAL_LIVES = 3;
     private static final String PLAYER_ID = "playerId"; // Constant for playerId to avoid duplication
     private final List<String> playerOrder = new ArrayList<>();
     private final Map<String, Player> players = new ConcurrentHashMap<>();
@@ -166,10 +165,18 @@ public class GameController {
                             .findFirst()
                             .orElse(null);
 
+
+                    String playerName = players.get(winner).getName();
+
+
+                    System.out.println("EL jugador GANO, felicidades: "+ winner +  " name: " + playerName);
+
                     messagingTemplate.convertAndSend("/topic/game-updates",
                             Map.of(
                                     "type", "GAME_OVER",
-                                    "winner", winner));
+                                    "winner", winner,
+                                    "nameWinner", playerName));
+
                 }
             } else {
                 messagingTemplate.convertAndSend("/topic/game-updates",
