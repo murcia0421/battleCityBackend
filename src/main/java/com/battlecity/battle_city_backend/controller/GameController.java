@@ -22,8 +22,8 @@ public class GameController {
     private final SimpMessagingTemplate messagingTemplate;
 
     private static final Logger logger = LoggerFactory.getLogger(GameController.class);
-    private static final int INITIAL_LIVES = 3;
-    private static final String PLAYER_ID = "playerId";  // Constant for playerId to avoid duplication
+    // private static final int INITIAL_LIVES = 3;
+    private static final String PLAYER_ID = "playerId"; // Constant for playerId to avoid duplication
     private final List<String> playerOrder = new ArrayList<>();
     private final Map<String, Player> players = new ConcurrentHashMap<>();
     private final Map<String, Integer> playerLives = new ConcurrentHashMap<>();
@@ -56,8 +56,7 @@ public class GameController {
             return mapper.writeValueAsString(Map.of(
                     "type", "GAME_START",
                     "player", playerInfo,
-                    "playerIndex", playerOrder.indexOf(playerId)
-            ));
+                    "playerIndex", playerOrder.indexOf(playerId)));
         } catch (Exception e) {
             logger.error("Error processing game start: {}", e.getMessage(), e);
             return message;
@@ -154,8 +153,7 @@ public class GameController {
                 messagingTemplate.convertAndSend("/topic/game-updates",
                         Map.of(
                                 "type", "PLAYER_ELIMINATED",
-                                "playerId", playerId
-                        ));
+                                "playerId", playerId));
 
                 long playersAlive = players.values().stream()
                         .filter(Player::isAlive)
@@ -171,16 +169,14 @@ public class GameController {
                     messagingTemplate.convertAndSend("/topic/game-updates",
                             Map.of(
                                     "type", "GAME_OVER",
-                                    "winner", winner
-                            ));
+                                    "winner", winner));
                 }
             } else {
                 messagingTemplate.convertAndSend("/topic/game-updates",
                         Map.of(
                                 "type", "PLAYER_HIT",
                                 "playerId", playerId,
-                                "lives", newLives
-                        ));
+                                "lives", newLives));
             }
         } catch (Exception e) {
             logger.error("Error processing hit: {}", e.getMessage(), e);
