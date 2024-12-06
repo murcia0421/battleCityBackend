@@ -20,7 +20,7 @@ public class PlayerController {
     private final List<String> players = new ArrayList<>();
     private final PlayerService playerService;
     private final PowerService powerService;
-    
+
     @MessageMapping("/add-player")
     @SendTo("/topic/players")
     public List<String> addPlayer(String playerName) {

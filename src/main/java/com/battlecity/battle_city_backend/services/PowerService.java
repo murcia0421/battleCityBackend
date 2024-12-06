@@ -52,7 +52,8 @@ public class PowerService {
     @Scheduled(fixedRate = 10000) // Cada 10 segundos
     public void generatePower() {
         // Buscar una posición aleatoria en el mapa que sea 0
-        int row, col;
+        int row;
+        int col;
         do {
             row = random.nextInt(mapData.length);
             col = random.nextInt(mapData[0].length);

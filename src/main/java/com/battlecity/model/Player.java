@@ -16,7 +16,7 @@ public class Player {
     private String direction;
     private String tankColor;
     private int lives;
-    private boolean Alive;
+    private boolean alive;
 
     public Player() {
         // Constructor vacío necesario para deserialización
@@ -29,7 +29,7 @@ public class Player {
         this.position = null; // Posición inicial
         this.direction = "down"; // Dirección inicial
         this.lives = lives;
-        this.Alive = isAlive;
+        this.alive = isAlive;
     }
 
     public Player(String playerId, String name, String tankColor) {
@@ -38,7 +38,7 @@ public class Player {
         this.tankColor = tankColor;
         this.position = null; // Posición inicial
         this.direction = "down"; // Dirección inicial
-        this.Alive = true;
+        this.alive = true;
     }
 
     // Getters and Setters originales
@@ -92,11 +92,11 @@ public class Player {
     }
     @JsonProperty("isAlive") // Este mapeo conecta el JSON con "isAlive" al atributo "alive".
     public boolean isAlive() {
-        return Alive;
+        return alive;
     }
 
     @JsonProperty("isAlive")
     public void setAlive(boolean alive) {
-        this.Alive = alive;
+        this.alive = alive;
     }
 }
