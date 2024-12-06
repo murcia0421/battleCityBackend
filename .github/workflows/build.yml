@@ -1,27 +1,25 @@
-name: Build and Deploy Backend Docker Image
+name: Build and Deploy Docker Image
 
 on:
   push:
     branches:
-      - main
+      - main  
 
-jobs:
+jobs
   build-and-push:
     runs-on: ubuntu-22.04
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
 
-    - name: Set up JDK 17
+    - name: Set up Java
       uses: actions/setup-java@v3
       with:
-        java-version: '17'
         distribution: 'temurin'
+        java-version: '17'
 
-    - name: Build with Maven
+    - name: Build project with Maven
       run: mvn clean package
 
     - name: Log in to Docker Hub
@@ -35,9 +33,7 @@ jobs:
       with:
         context: .
         push: true
-        tags: |
-          cristindavid0124/blackjack-backend:latest
-          imurciag/battlecitybackend:${{ github.sha }}
+        tags: imurciag/battlecitybackend:latest  # Usa tu imagen de Docker Hub
 
   deploy:
     runs-on: ubuntu-22.04
@@ -46,8 +42,8 @@ jobs:
     steps:
     - name: Deploy to Azure App Service
       env:
-        AZURE_WEBAPP_NAME: "BlackJackRoyaleApp"
-        AZURE_RESOURCE_GROUP: "BlackJackRoyaleApp_group"
+        AZURE_WEBAPP_NAME: "Battlecitybackend"  # Nombre del App Service en Azure
+        AZURE_RESOURCE_GROUP: "Battlecitybackend_group"  # Nombre del grupo de recursos en Azure
         AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
         AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
         AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
@@ -59,6 +55,5 @@ jobs:
         az webapp config container set \
           --name $AZURE_WEBAPP_NAME \
           --resource-group $AZURE_RESOURCE_GROUP \
-          --docker-custom-image-name imurciag/battlecitybackend:${{ github.sha }} \
+          --docker-custom-image-name imurciag/battlecitybackend:latest \
           --docker-registry-server-url https://index.docker.io/v1/
-        az webapp restart --name $AZURE_WEBAPP_NAME --resource-group $AZURE_RESOURCE_GROUP
