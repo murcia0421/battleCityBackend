@@ -7,7 +7,6 @@ import com.battlecity.model.PlayerDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -21,7 +20,7 @@ public class PlayerController {
     private final List<String> players = new ArrayList<>();
     private final PlayerService playerService;
     private final PowerService powerService;
-
+    
     @MessageMapping("/add-player")
     @SendTo("/topic/players")
     public List<String> addPlayer(String playerName) {
@@ -38,7 +37,6 @@ public class PlayerController {
         player.setName(playerDTO.getName());
         player.setPosition(playerDTO.getPosition());
         player.setDirection(playerDTO.getDirection());
-        //player.setScore(playerDTO.getScore());
 
         playerService.save(player);
     }
@@ -54,7 +52,6 @@ public class PlayerController {
             playerDTO.setName(player.getName());
             playerDTO.setPosition(player.getPosition());
             playerDTO.setDirection(player.getDirection());
-            //playerDTO.setScore(player.getScore());
             return playerDTO;
         }).toList();
     }
@@ -70,7 +67,6 @@ public class PlayerController {
         playerDTO.setName(player.getName());
         playerDTO.setPosition(player.getPosition());
         playerDTO.setDirection(player.getDirection());
-        //playerDTO.setScore(player.getScore());
         return playerDTO;
     }
 
@@ -82,15 +78,12 @@ public class PlayerController {
 
     @PutMapping("/players")
     public void update(@RequestBody PlayerDTO playerDTO) {
-        // Convierte el DTO a la entidad
-        Player player = new Player();
-        player.setId(playerDTO.getId());
-        player.setName(playerDTO.getName());
-        player.setPosition(playerDTO.getPosition());
-        player.setDirection(playerDTO.getDirection());
-        //player.setScore(playerDTO.getScore());
-
-        playerService.save(player);
+        Player existingPlayer = playerService.findById(playerDTO.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Player not found with ID: " + playerDTO.getId()));
+        existingPlayer.setName(playerDTO.getName());
+        existingPlayer.setPosition(playerDTO.getPosition());
+        existingPlayer.setDirection(playerDTO.getDirection());
+        playerService.save(existingPlayer);
     }
 
     @MessageMapping("/collect-power")
