@@ -5,7 +5,7 @@ on:
     branches:
       - main  
 
-jobs
+jobs:
   build-and-push:
     runs-on: ubuntu-22.04
 
