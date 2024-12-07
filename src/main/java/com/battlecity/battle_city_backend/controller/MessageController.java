@@ -1,11 +1,18 @@
 package com.battlecity.battle_city_backend.controller;
 
+import com.battlecity.model.GameRoom;
 import com.battlecity.model.Player;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -13,51 +20,63 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class MessageController {
 
     private static final Logger logger = LoggerFactory.getLogger(MessageController.class);
-    private final List<Player> players = new CopyOnWriteArrayList<>();
     private static final int MAX_PLAYERS = 4;
+    private final Map<String, GameRoom> activeRooms = new ConcurrentHashMap<>();
 
-    @MessageMapping("/players")
-    @SendTo("/topic/players")
-    public Player handlePlayerMessage(Player player) {
-        logger.info("Mensaje recibido en el servidor");
+    @MessageMapping("/room/{roomId}/players")
+    @SendTo("/topic/room/{roomId}/players")
+    public Player handlePlayerMessage(@DestinationVariable String roomId, Player player) {
+        logger.info("Mensaje recibido para sala: {}", roomId);
 
-        // Only log non-sensitive or system-controlled information
-        logger.info("Recibido color del tanque. Nombre del jugador no registrado para evitar filtración.");
+        // Obtener o crear sala
+        GameRoom room = activeRooms.computeIfAbsent(roomId,
+                id -> new GameRoom(id, MAX_PLAYERS));
 
-        String playerId = "Jugador " + (players.size() + 1);
+        String playerId = "Jugador " + (room.getPlayers().size() + 1);
         Player newPlayer = new Player(playerId, player.getName(), player.getTankColor());
 
-        if (!players.contains(newPlayer)) {
-            players.add(newPlayer);
-            logger.info("Nuevo jugador añadido con ID interno: {}", playerId);
-            logger.info("Total jugadores en la lista: {}", players.size());
-        }
+        room.addPlayer(newPlayer);
+        logger.info("Nuevo jugador añadido a la sala {} con ID: {}", roomId, playerId);
 
         return newPlayer;
     }
 
-    @MessageMapping("/leave")
-    @SendTo("/topic/players")
-    public void handlePlayerLeave(String playerId) {
-        players.removeIf(p -> p.getId().equals(playerId));
+    @MessageMapping("/room/{roomId}/leave")
+    @SendTo("/topic/room/{roomId}/players")
+    public void handlePlayerLeave(@DestinationVariable String roomId, String playerId) {
+        GameRoom room = activeRooms.get(roomId);
+        if (room != null) {
+            room.removePlayer(playerId);
 
-        // Log internal identifiers only, avoid logging actual player ID from user input
-        logger.info("Jugador con ID interno eliminado.");
-        logger.info("Total de jugadores restantes: {}", players.size());
+            // Si la sala está vacía, la eliminamos completamente
+            if (room.getPlayers().isEmpty()) {
+                activeRooms.remove(roomId);
+                logger.info("Sala {} eliminada por estar vacía", roomId);
+            }
+        }
+        logger.info("Jugador {} eliminado de la sala {}", playerId, roomId);
     }
 
-    public List<Player> getPlayers() {
-        return List.copyOf(players);
+    @MessageMapping("/room/{roomId}/request-players")
+    @SendTo("/topic/room/{roomId}/players")
+    public List<Player> getPlayersStatus(@DestinationVariable String roomId) {
+        GameRoom room = activeRooms.get(roomId);
+        if (room != null) {
+            logger.info("Solicitud de estado de jugadores para sala {}", roomId);
+            return room.getPlayers();
+        }
+        return new ArrayList<>();  // Retornar lista vacía si la sala no existe
     }
 
-    public boolean isFull() {
-        return players.size() >= MAX_PLAYERS;
-    }
+    @MessageMapping("/room/{roomId}/leave-allplayers")
+    @SendTo("/topic/room/{roomId}/players")
+    public List<Player> handleAllPlayersLeave(@DestinationVariable String roomId) {
+        logger.info("Eliminando todos los jugadores de la sala: {}", roomId);
 
-    @MessageMapping("/request-players")
-    @SendTo("/topic/players")
-    public List<Player> getPlayersStatus() {
-        logger.info("Solicitud de estado de jugadores recibida. Total de jugadores en la lista: {}", players.size());
-        return players;
+        // Eliminar la sala completa
+        activeRooms.remove(roomId);
+
+        // Retornar lista vacía para actualizar a los clientes
+        return new ArrayList<>();
     }
 }
